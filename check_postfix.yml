@@ -1,0 +1,31 @@
+---
+  - hosts: {{ host }}
+    gather_facts: true
+    become: true
+    tasks:
+
+    - name: Copy script
+      copy:
+        src: check_postfix.sh
+        dest: /opt/check_postfix.sh
+        mode: u=x,g=x,o=x
+
+    - name: " Check Postfix {{ ansible_hostname }} - {{ ansible_distribution }}"
+      shell: 
+        /opt/check_postfix.sh
+      args:
+        executable: /bin/bash
+      register: output
+      failed_when: "output.rc == 1"
+    - debug:
+        var: output.stdout_lines
+
+    - name: " Remove script"
+      shell: 
+        rm /opt/check_postfix.sh
+      args:
+        executable: /bin/bash
+      register: output
+      failed_when: "output.rc == 1"
+    - debug:
+        var: output.stdout_lines
